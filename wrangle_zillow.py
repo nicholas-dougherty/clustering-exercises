@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 from sklearn.model_selection import train_test_split
+from datetime import date
 
 
 def wrangle_zillow():
@@ -119,6 +120,28 @@ def data_prep(df, cols_to_remove=[], prop_required_column=0.5, prop_required_row
     df = handle_missing_values(df, prop_required_column, prop_required_row)
     return df
 
+def remove_outliers(df, k, col_list):
+    ''' remove outliers from a list of columns in a dataframe 
+        and return that dataframe
+    '''
+    
+    for col in col_list:
+        # get quartiles
+        q1, q3 = df[f'{col}'].quantile([.25, .75])  
+        # calculate interquartile range
+        iqr = q3 - q1   
+        # get upper bound
+        upper_bound = q3 + k * iqr 
+        # get lower bound
+        lower_bound = q1 - k * iqr   
+
+        # return dataframe without outliers
+        
+        df = df[(df[f'{col}'] > lower_bound) & (df[f'{col}'] < upper_bound)]
+        
+    return df
+
+
 def prep_zillow(df):
     
     df = data_prep(df)
@@ -137,10 +160,9 @@ def prep_zillow(df):
  # keep only properties with square footage greater than 70 (legal size of a bedroom)
     df = df[df.calculatedfinishedsquarefeet > 70]
     
-
-    
     # Minimum lot size of single family units.
     df = df[df.lotsizesquarefeet >= 5000].copy()
+    
     
     
     #df = df[~df['propertylandusetypeid'].isin([263, 265, 275])]
@@ -150,29 +172,24 @@ def prep_zillow(df):
    # 0101 Single residence with pool
    # 0104 - Single resident with therapy pool 
     df = df[(df.propertycountylandusecode == '0100') |
-      (df.propertycountylandusecode == '0101') |
-      (df.propertycountylandusecode == '0104')]
+            (df.propertycountylandusecode == '0101') |
+            (df.propertycountylandusecode == '0104') |
+            (df.propertycountylandusecode == '122') | 
+            (df.propertycountylandusecode == '1111') |
+            (df.propertycountylandusecode == '1110') |
+            (df.propertycountylandusecode == '1')
+           ]
     
-    # With so few remaining nulls it is safe to now control where unit count is only 1 
-    df = df[df.unitcnt == 1.0]
     
-    # The last nulls can be dropped altogether. 
-    df = df.dropna()
+    # Remove 13 rows where unit count is 2. The NaN's can be safely assumed as 1 and were just mislabeled in other counties.  
+    df = df[df['unitcnt'] != 2]
+    df['unitcnt'].fillna(1)
+    
     
     # Property where finished area is 152 but bed count is 5. 
     df = df.drop(labels=75325, axis=0)
     
-    # This removes the 30 rows where solar is at play. 1% of data. 
-    df = df[df['heatingorsystemtypeid'] != 20]
-    
-    df['yearbuilt'] = df['yearbuilt'].astype(int)
-    df.yearbuilt = df.yearbuilt.astype(object) 
-    df['age'] = 2017-df['yearbuilt']
-    df = df.drop(columns='yearbuilt')
-    df['age'] = df['age'].astype('int')
-    
-    df['central_cooling'] = df.heatingorsystemdesc.map({'Central': 1, 'Floor/Wall': 0})
-    
+      
             
     # Redudant columns or uninterpretable columns
     # Unit count was dropped because now its known that theyre all 1. 
@@ -188,10 +205,28 @@ def prep_zillow(df):
     # Id does nothing, and parcelid is easier to represent. 
 
     
-    df.drop(columns= ['finishedsquarefeet12', 'fullbathcnt', 'calculatedbathnbr',
+    df =df.drop(columns= ['finishedsquarefeet12', 'fullbathcnt', 'calculatedbathnbr',
                       'propertyzoningdesc', 'unitcnt', 'propertylandusedesc',
                       'assessmentyear', 'roomcnt', 'regionidcounty', 'propertylandusetypeid',
-                      'heatingorsystemtypeid', 'id', 'heatingorsystemdesc' ],
-            axis=1, inplace=True)
+                      'heatingorsystemtypeid', 'id', 'heatingorsystemdesc', 'buildingqualitytypeid'],
+            axis=1)
+    
+    
+    # The last nulls can be dropped altogether. 
+    df = df.dropna()
+ 
+
+    df['yearbuilt'] = df['yearbuilt'].astype(int)
+    df.yearbuilt = df.yearbuilt.astype(object) 
+    df['age'] = 2017-df['yearbuilt']
+    df = df.drop(columns='yearbuilt')
+    df['age'] = df['age'].astype('int')
+    print('Yearbuilt converted to age. \n')
+    
+    # Removing problematic outlier groups.  
+    df = remove_outliers(df, 3, ['lotsizesquarefeet', 'structuretaxvaluedollarcnt', 'taxvaluedollarcnt',
+                                'landtaxvaluedollarcnt', 'taxamount', 'calculatedfinishedsquarefeet'])
+    
+    df = df.set_index('parcelid')
     
     return df
