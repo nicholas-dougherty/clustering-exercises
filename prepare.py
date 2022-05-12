@@ -42,7 +42,8 @@ def handle_missing_values(df, prop_required_column=0.5 , prop_required_row=0.5):
 # combined in one function
 def data_prep(df, cols_to_remove=[], prop_required_column=0.5, prop_required_row=0.5):
     '''
-    This function calls the remove_columns and handle_missing_values to drop columns that need to be removed. It also drops rows and columns that have more 
+    This function calls the remove_columns and handle_missing_values
+    to drop columns that need to be removed. It also drops rows and columns that have more 
     missing values than the specified threshold.
     '''
     df = remove_columns(df, cols_to_remove)
