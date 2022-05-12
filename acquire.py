@@ -1,22 +1,36 @@
+#                                                                                                   # 
+#                                                                                                   # 
+#         ,---,         ,----..      ,----..                      ,---,,-.----.       ,---,         # 
+#        '  .' \       /   /   \    /   /   \             ,--, ,`--.' |\    /  \    ,'  .'          # 
+#       /  ;    '.    |   :     :  /   .     :          ,'_ /| |   :  :;   :    \ ,---.'            # 
+#      :  :       \   .   |  ;. / .   /   ;.  \    .--. |  | : :   |  '|   | .\ : |   |   .         # 
+#      :  |   /\   \  .   ; /--` .   ;   /  ` ;  ,'_ /| :  . | |   :  |.   : |: | :   :  |-         # 
+#      |  :  ' ;.   : ;   | ;    ;   |  ; \ ; |  |  ' | |  . . '   '  ;|   |  \ : :   |  ;/         # 
+#      |  |  ;/  \   \|   : |    |   :  | ; | '  |  | ' |  | | |   |  ||   : .  / |   :   .         # 
+#      '  :  | \  \ ,'.   | '___ .   |  ' ' ' :  :  | | :  ' ; '   :  ;;   | |  \ |   |  |-         # 
+#      |  |  '  '--'  '   ; : .'|'   ;  \; /  |  |  ; ' |  | ' |   |  '|   | ;\  \'   :  ;/         # 
+#      |  :  :        '   | '/  : \   \  ',  . \ :  | : ;  ; | '   :  |:   ' | \.'|   |             # 
+#      |  | ,'        |   :    /   ;   :      ; |'  :  `--'   \;   |.' :   : :-'  |   :   .         # 
+#      `--''           \   \ .'     \   \ .'`--" :  ,      .-./'---'   |   |.'    |   | ,'          # 
+#                       `---`        `---`        `--`----'            `---'      `----'            # 
+#                                                                                                   # 
+#--------------------------------------------------------------------------------------------------|#
+#--------------------------------------------------------------------------------------------------|#
+# IMPORTS
 from env import host, username, password, get_db_url
 import os
 import pandas as pd 
 import numpy as np
-
-#_____________________________________________________________________________________________________________________________________________
-#_____________________________________________________________________________________________________________________________________________
-#_____________________________________________________________________________________________________________________________________________
-
+#--------------------------------------------------------------------------------------------------|#
+#--------------------------------------------------------------------------------------------------|#
 def get_db_url(database, username=username, host=host, password=password):
     return f"mysql+pymysql://{username}:{password}@{host}/{database}"
-#_____________________________________________________________________________________________________________________________________________
-#_____________________________________________________________________________________________________________________________________________
-
+#--------------------------------------------------------------------------------------------------|#
 def acquire_zillow_data(use_cache=True):
     '''
     This function returns a snippet of zillow's database as a Pandas DataFrame. 
-    When this SQL data is cached and extant in the os directory path, return the data as read into a df. 
-    If csv is unavailable, aquisition proceeds regardless,
+    When this SQL data is cached and extant in the os directory path,
+    return the data as read into a df. If csv is unavailable, aquisition proceeds regardless,
     reading the queried database elements into a dataframe, creating a cached csv file
     and lastly returning the dataframe for some sweet data science perusal.
     '''
@@ -51,14 +65,13 @@ def acquire_zillow_data(use_cache=True):
     df.to_csv('zillow.csv', index=False)
     
     return df
-
-
-#_____________________________________________________________________________________________________________________________________________
-#_____________________________________________________________________________________________________________________________________________
+#--------------------------------------------------------------------------------------------------|#
 def describe_data(df):
     '''
-    This function takes in a pandas dataframe and prints out the shape, datatypes, number of missing values, 
-    columns and their data types, summary statistics of numeric columns in the dataframe, as well as the value counts for categorical variables.
+    This function takes in a pandas dataframe and prints out the shape,
+    datatypes, number of missing values, columns and their data types,
+    summary statistics of numeric columns in the dataframe,
+    as well as the value counts for categorical variables.
     '''
     # Print out the "shape" of our dataframe - rows and columns
     print(f'This dataframe has {df.shape[0]} rows and {df.shape[1]} columns.')
@@ -105,5 +118,5 @@ def describe_data(df):
             print(f'Range of Values: [{df[col].min()} - {df[col].max()}] \n')
         print('------------------------------------------')
         print('--------------------------------------')
-
-
+#--------------------------------------------------------------------------------------------------|#
+#--------------------------------------------------------------------------------------------------|#
