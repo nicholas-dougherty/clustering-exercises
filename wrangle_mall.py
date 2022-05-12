@@ -1,29 +1,29 @@
+#                         _       ______  ___    _   __________    ______                           #           
+#                        | |     / / __ \/   |  / | / / ____/ /   / ____/                           #           
+#                        | | /| / / /_/ / /| | /  |/ / / __/ /   / __/                              #           
+#                        | |/ |/ / _, _/ ___ |/ /|  / /_/ / /___/ /___                              #           
+#                        |__/|__/_/ |_/_/  |_/_/ |_/\____/_____/_____/                              #             
+#--------------------------------------------------------------------------------------------------|#
+#--------------------------------------------------------------------------------------------------|#
+# imports
 import pandas as pd
 import numpy as np
 import os
-
 from sklearn.preprocessing import MinMaxScaler
 import scipy.stats as stats
-# use get_db_url function to connect to the codeup db
 from env import get_db_url
-
 from sklearn.model_selection import train_test_split
-
+#--------------------------------------------------------------------------------------------------|#
+#--------------------------------------------------------------------------------------------------|#
 def wrangle_mall():
     train, validate, test = prepare_mall(get_mallcustomer_data())
     
     return train, validate, test
-    
-
-# Acquire Data 
-
+#--------------------------------------------------------------------------------------------------|#
 def get_mallcustomer_data():
     df = pd.read_sql('SELECT * FROM customers;', get_db_url('mall_customers'))
     return df.set_index('customer_id')
-
-
-# Prepare Data
-
+#--------------------------------------------------------------------------------------------------|#
 def split_data(df, seed=123):
     '''
     This function takes in a pandas dataframe and a random seed. It splits the original
@@ -39,11 +39,11 @@ def split_data(df, seed=123):
     print('Validate: %d rows, %d cols' % validate.shape)
     print('Test: %d rows, %d cols' % test.shape)
     return train, validate, test
-
-# One hot encoding 
+#--------------------------------------------------------------------------------------------------|#
 def one_hot_encode(df):
     '''
-    This function takes in a dataframe and one hot encodes the gender column and drops the original column before returning the dataframe.
+    This function takes in a dataframe and one hot encodes
+    the gender column and drops the original column before returning the dataframe.
     '''
     df['is_female'] = df.gender == 'Female'
     df = df.drop(columns='gender')
@@ -55,12 +55,13 @@ def prepare_mall(df):
     train, validate, test = split_data(df)
     
     return train, validate, test
-
-# Scaling
+#--------------------------------------------------------------------------------------------------|#
 def scale_data(train, validate, test):
     '''
-    This function takes in the features for train, validate and test splits. It creates a MinMax Scaler and fits that to the train set.
-    It then transforms the validate and test splits and returns the scaled features for the train, validate and test splits.
+    This function takes in the features for train, validate and test splits.
+    It creates a MinMax Scaler and fits that to the train set.
+    It then transforms the validate and test splits and returns the scaled features
+    for the train, validate and test splits.
     '''
     columns_to_scale = ['age', 'spending_score', 'annual_income']
     train_scaled = train.copy()
@@ -75,12 +76,12 @@ def scale_data(train, validate, test):
     test_scaled[columns_to_scale] = scaler.transform(test[columns_to_scale])
 
     return train_scaled, validate_scaled, test_scaled
-
+#--------------------------------------------------------------------------------------------------|#
 def get_exploration_data():
     df = get_mallcustomer_data()
     train, validate, test = split(df)
     return train
-
+#--------------------------------------------------------------------------------------------------|#
 def get_modeling_data(scale_data=False):
     df = get_mallcustomer_data()
     df = one_hot_encode(df)
@@ -89,3 +90,6 @@ def get_modeling_data(scale_data=False):
         return scale(train, validate, test)
     else:
         return train, validate, test
+#--------------------------------------------------------------------------------------------------|#
+#--------------------------------------------------------------------------------------------------|#
+#--------------------------------------------------------------------------------------------------|#
